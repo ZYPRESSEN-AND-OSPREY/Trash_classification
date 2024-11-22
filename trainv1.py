@@ -9,7 +9,6 @@ IMG_SIZE = 224
 BATCH_SIZE = 32
 NUM_CLASSES = 40
 
-# 数据加载器
 class GarbageDataset:
     def __init__(self, root_dir, txt_file, is_training=True):
         self.root_dir = root_dir
@@ -23,13 +22,20 @@ class GarbageDataset:
                 img_path = img_path.lstrip('./')
                 self.data.append((img_path, int(label)))
                 
-        print(f"加载了 {len(self.data)} 个样本")
+        self.num_samples = len(self.data)
+        print(f"加载了 {self.num_samples} 个样本")
     
     def preprocess_image(self, img_path):
         # 读取和预处理图片
         img = cv2.imread(os.path.join(self.root_dir, img_path))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+        if img is None:
+            print(f"警告：无法读取图片 {img_path}")
+            # 返回一个空白图片作为替代
+            img = np.zeros((IMG_SIZE, IMG_SIZE, 3), dtype=np.uint8)
+        else:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
+        
         img = img.astype(np.float32) / 255.0
         
         if self.is_training:
@@ -42,8 +48,11 @@ class GarbageDataset:
     
     def create_dataset(self):
         def generator():
-            for img_path, label in self.data:
-                yield self.preprocess_image(img_path), label
+            while True:  # 添加无限循环
+                indices = np.random.permutation(len(self.data))
+                for idx in indices:
+                    img_path, label = self.data[idx]
+                    yield self.preprocess_image(img_path), label
         
         dataset = tf.data.Dataset.from_generator(
             generator,
@@ -54,7 +63,7 @@ class GarbageDataset:
         )
         
         # 设置批处理
-        dataset = dataset.shuffle(1000).batch(BATCH_SIZE)
+        dataset = dataset.batch(BATCH_SIZE)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
         
         return dataset
@@ -80,15 +89,12 @@ def create_model():
     
     return model
 
-# TFLite转换函数
 def convert_to_tflite(model, dataset, filename='garbage_classifier.tflite'):
-    # 转换为TFLite模型
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.target_spec.supported_types = [tf.float16]
     tflite_model = converter.convert()
     
-    # 保存模型
     with open(filename, 'wb') as f:
         f.write(tflite_model)
     print(f"TFLite模型已保存为: {filename}")
@@ -100,6 +106,10 @@ def main():
     
     train_data = train_dataset.create_dataset()
     val_data = val_dataset.create_dataset()
+    
+    # 计算steps_per_epoch
+    steps_per_epoch = train_dataset.num_samples // BATCH_SIZE
+    validation_steps = val_dataset.num_samples // BATCH_SIZE
     
     # 创建和编译模型
     model = create_model()
@@ -114,6 +124,8 @@ def main():
         train_data,
         validation_data=val_data,
         epochs=20,
+        steps_per_epoch=steps_per_epoch,
+        validation_steps=validation_steps,
         callbacks=[
             tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True),
             tf.keras.callbacks.ReduceLROnPlateau(factor=0.2, patience=2)
