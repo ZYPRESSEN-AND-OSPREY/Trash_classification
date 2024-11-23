@@ -6,7 +6,7 @@ import serial  # 添加串口支持
 
 # 全局控制变量
 DEBUG_WINDOW = False  # 设置为 False 可关闭图像窗口显示
-ENABLE_SERIAL = False  # 设置为 False 可关闭串口输出
+ENABLE_SERIAL = True  # 设置为 False 可关闭串口输出
 
 # 串口配置
 SERIAL_PORT = '/dev/ttyS0'  # 根据实际串口设备修改
