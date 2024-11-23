@@ -88,10 +88,7 @@ class GarbageDataset:
         return dataset
 
 def create_model():
-    # 启用混合精度训练
-    policy = tf.keras.mixed_precision.Policy('mixed_float16')
-    tf.keras.mixed_precision.set_global_policy(policy)
-    
+    # 移除混合精度策略
     base_model = tf.keras.applications.EfficientNetV2B0(
         input_shape=(IMG_SIZE, IMG_SIZE, 3),
         include_top=False,
@@ -117,8 +114,7 @@ def create_model():
         layers.Dense(512, activation='relu'),
         layers.BatchNormalization(),
         layers.Dropout(0.2),
-        # 确保输出层使用float32
-        layers.Dense(NUM_CLASSES, activation='softmax', dtype='float32')
+        layers.Dense(NUM_CLASSES, activation='softmax')
     ])
     
     return model
@@ -170,29 +166,26 @@ def create_callbacks(model_name="garbage_classifier"):
     ]
 
 def create_optimizer():
+    # 使用简单的指数衰减
     initial_learning_rate = 0.001
-    first_decay_steps = 1000
+    decay_steps = 1000
+    decay_rate = 0.9
     
-    # 使用余弦退火学习率
-    lr_schedule = tf.keras.experimental.CosineDecayRestarts(
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate,
-        first_decay_steps,
-        t_mul=2.0,
-        m_mul=0.9,
-        alpha=1e-5
+        decay_steps,
+        decay_rate,
+        staircase=True
     )
     
-    # 使用AdamW优化器
-    optimizer = tf.keras.optimizers.AdamW(
+    optimizer = tf.keras.optimizers.Adam(
         learning_rate=lr_schedule,
-        weight_decay=0.0001,
         beta_1=0.9,
         beta_2=0.999,
         epsilon=1e-8
     )
     
     return optimizer
-
 def main():
     # 创建数据集
     train_dataset = GarbageDataset('garbage', 'train.txt', is_training=True)
