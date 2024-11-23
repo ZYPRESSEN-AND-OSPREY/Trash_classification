@@ -6,10 +6,10 @@ Training require -->   tensorflow-cpu(tensorflow) opencv-python numpy
 Inference require -->  tensorflow opencv-python numpy  
 OVER.
 
-
- What you are taking for a gift is a problem you have to solve.
- Genius is what makes us forget the master's talent.
- Genius is what makes us forget talent.
- Where genius wears thin skill may show through. (Overture to the Mastersingers.)
- Genius is what makes us unable to see the master's talent.
- Only where genius wears thin can you see the talent.
+## 
+- What you are taking for a gift is a problem you have to solve.
+- Genius is what makes us forget the master's talent.
+- Genius is what makes us forget talent.
+- Where genius wears thin skill may show through. (Overture to the Mastersingers.)
+- Genius is what makes us unable to see the master's talent.
+- Only where genius wears thin can you see the talent.
