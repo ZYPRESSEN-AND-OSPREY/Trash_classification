@@ -3,7 +3,28 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
 import cv2
+# GPU 配置
+def configure_gpu():
+    # 获取可用的GPU列表
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        try:
+            # 启用GPU内存增长
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            
+            # 如果有多个GPU，可以选择使用特定的GPU
+            # tf.config.set_visible_devices(gpus[0], 'GPU')
+            
+            logical_gpus = tf.config.list_logical_devices('GPU')
+            print(f"找到 {len(gpus)} 个物理GPU, {len(logical_gpus)} 个逻辑GPU")
+        except RuntimeError as e:
+            print(f"GPU配置错误: {e}")
+    else:
+        print("未找到可用的GPU，将使用CPU训练")
 
+# 在代码开始时调用GPU配置
+configure_gpu()
 # 数据预处理参数
 IMG_SIZE = 224
 BATCH_SIZE = 32
