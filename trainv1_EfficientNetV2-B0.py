@@ -153,9 +153,9 @@ def create_callbacks(model_name="garbage_classifier"):
             min_lr=1e-6,
             verbose=1
         ),
-        # 模型检查点
+        # 模型检查点 - 修改文件扩展名为.keras
         tf.keras.callbacks.ModelCheckpoint(
-            f'{model_name}_best.h5',
+            f'{model_name}_best.keras',
             monitor='val_accuracy',
             save_best_only=True,
             mode='max',
@@ -212,18 +212,17 @@ def main():
     history = model.fit(
         train_data,
         validation_data=val_data,
-        epochs=90,  # 增加训练轮次
+        epochs=90,
         steps_per_epoch=steps_per_epoch,
         validation_steps=validation_steps,
         callbacks=create_callbacks(),
         verbose=1
     )
     
-    # 保存最终模型
-    model.save('garbage_classifier_final.h5')
+    # 保存最终模型 - 修改文件扩展名为.keras
+    model.save('garbage_classifier_final.keras')
     
     # 转换为TFLite模型
     convert_to_tflite(model, val_data)
-
 if __name__ == '__main__':
     main()
