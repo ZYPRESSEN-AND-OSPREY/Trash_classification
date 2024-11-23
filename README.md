@@ -6,7 +6,6 @@ Training require -->   tensorflow-cpu(tensorflow) opencv-python numpy
 Inference require -->  tensorflow opencv-python numpy  
 OVER.
 
-## 引用
 
 - What you are taking for a gift is a problem you have to solve.
 - Genius is what makes us forget the master's talent.
