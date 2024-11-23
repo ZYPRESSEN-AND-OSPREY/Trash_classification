@@ -4,7 +4,6 @@ Training framework --> tensorflow
 Vitural python enviroment --> conda python=3.10  
 Training require -->   tensorflow-cpu(tensorflow) opencv-python numpy  
 Inference require -->  tensorflow opencv-python numpy  
-OVER.
 
 ## 
 - What you are taking for a gift is a problem you have to solve.
