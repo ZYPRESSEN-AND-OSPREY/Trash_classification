@@ -90,15 +90,14 @@ class GarbageDataset:
         return dataset
 
 def create_model():
-    base_model = tf.keras.applications.EfficientNetV2B0(
+    base_model = tf.keras.applications.ResNet50V2(
         input_shape=(IMG_SIZE, IMG_SIZE, 3),
         include_top=False,
         weights='imagenet'
     )
     
-    # 冻结部分层
     base_model.trainable = True
-    for layer in base_model.layers[:-20]:  # 可以调整解冻的层数
+    for layer in base_model.layers[:-30]:
         layer.trainable = False
     
     model = models.Sequential([
