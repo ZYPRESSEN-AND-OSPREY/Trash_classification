@@ -19,7 +19,7 @@ class GarbageDetectorTFLite:
             self.labels = json.load(f)
         
         # 加载 TFLite 模型并分配张量
-        self.interpreter = tf.lite.Interpreter(model_path=model_path)
+        self.interpreter = tf.lite.Interpreter(model_path=model_path, num_threads=4)
         self.interpreter.allocate_tensors()
         
         # 获取输入和输出张量的信息
