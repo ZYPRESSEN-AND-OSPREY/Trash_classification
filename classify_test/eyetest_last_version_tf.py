@@ -2,7 +2,41 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import json
-
+def setup_gpu():
+    """
+    检测并配置GPU。
+    返回:
+        bool: 是否使用GPU
+        str: 设备信息说明
+    """
+    try:
+        # 检测是否有可用的GPU
+        gpus = tf.config.list_physical_devices('GPU')
+        
+        if not gpus:
+            # 如果没有GPU，则使用CPU
+            tf.config.set_visible_devices([], 'GPU')
+            return False, "未检测到GPU，将使用CPU进行推理"
+            
+        # 有GPU的情况下，进行内存配置
+        for gpu in gpus:
+            try:
+                # 允许GPU内存按需增长
+                tf.config.experimental.set_memory_growth(gpu, True)
+            except RuntimeError as e:
+                print(f"GPU内存配置失败: {str(e)}")
+                return False, "GPU配置失败，将使用CPU进行推理"
+        
+        # 获取GPU信息
+        gpu_info = tf.config.experimental.get_device_details(gpus[0])
+        gpu_name = gpu_info.get('device_name', 'Unknown GPU')
+        
+        return True, f"已启用GPU: {gpu_name}"
+        
+    except Exception as e:
+        print(f"GPU检测过程发生错误: {str(e)}")
+        return False, "设备检测失败，将使用CPU进行推理"
+    
 class GarbageDetectorTFLite:
     def __init__(self, model_path, labels_path):
         # 加载标签映射
@@ -124,6 +158,10 @@ class GarbageDetectorTFLite:
         return frame
 
 def main():
+    use_gpu, device_info = setup_gpu()
+    print("\n设备信息:")
+    print(device_info)
+    print("-" * 30)
     # 初始化检测器
     detector = GarbageDetectorTFLite(
         model_path='garbage_classifier.tflite',
